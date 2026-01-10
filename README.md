@@ -1,66 +1,103 @@
 # FPGA Timer Challenge
 
-Initial project setup for the parametric timer design challenge.
+A parametric, synthesizable VHDL timer designed and verified as part of the FPGA Engineering Challenge.
+The project includes RTL, testbenches, precision-analysis scripts, and a Yosys synthesis flow.
 
-This commit includes:
-- Project directory structure (`src/`, `tb/`)
-- Skeleton RTL file (`src/timer.vhd`) with design assumptions
-- Minimal VUnit testbench with a simple test (`tb/tb_timer.vhd`)
-- Basic VUnit runner script (`run.py`)
-- Minimal Makefile with `run` and `clean` targets
+---
 
-This commit is mainly to confirm that the flow works.
-The goal of the project is to implement and verify a parametric timer in VHDL,
-following the specifications of the FPGA Engineering Challenge.
----------------------------------------------------------------------------------------------
+## 1. Overview
 
-				COMMIT 2: add RTL, VUnit tests, and lab_test precision experiments
----------------------------------------------------------------------------------------------
+This project implements a configurable timer with:
 
-I added a set of experiments and a VUnit testbench to validate the timer’s cycle‑calculation
- 
-and bit‑width estimation.
+- integer-based cycle computation
+- minimal counter width
+- synchronous logic with asynchronous reset
+- rising-edge start detection
+- full simulation and synthesis validation
 
-What’s included
+Technologies used: VHDL-2008, VUnit, Yosys + GHDL, and custom analysis scripts.
 
-lab_test/ — helper scripts used to compare implementations and validate assumptions.
+---
 
-tb_compare_div.sh — compares cycle computation precision across implementations (natural integer, floating point, native time, unsigned 64). The natural integer implementation has the smallest numeric range for very large delays (expected), but it is the only approach that is synthesizable and produces optimal bit‑width estimates (synthesis to be verified with Yosys).
+## 2. Repository Structure
 
-tb_test_width.sh — runs many (clk_hz, delay) combinations to verify the computed counter width is minimal for normal operating ranges.
+src/          → RTL (timer + synthesis wrapper) 
+tb/           → VUnit testbench 
+lab_test/     → precision & bit-width experiments 
+scripts/      → Yosys synthesis scripts 
+netlist/      → synthesized output 
+run.py        → VUnit runner 
+Makefile      → run, clean, synth targets 
 
-tb_time_to_calc.sh — runs the natural integer cycle computation across frequency/delay combinations and verifies rounding‑up behavior.
+---
 
-Design choices
+## 3. RTL Summary
 
-The RTL uses the natural integer implementation for cycle computation and bit‑width estimation to remain synthesizable and to minimize counter width.
+- Cycle computation uses natural integer arithmetic:
+  - synthesizable
+  - predictable
+  - minimal counter width
 
-start_i is treated as a pulse input; the RTL implements an internal register stage to detect rising edges.
+- start_i is treated as a pulse input using an internal rising-edge detector.
+- The design is synchronous with an asynchronous reset.
+- done_o is asserted when idle or when the programmed delay expires.
 
-The design is synchronous with an asynchronous reset (arst), and the testbench exercises reset, start, counting, and completion behavior for the typical parameter range.
+---
 
-If so I will then run :
+## 4. Verification
 
-Parameterized sweep run the same test for several (clk_freq_hz_g, delay_g) pairs and assert the computed cycles match a golden reference.
+### VUnit Testbench
 
-Boundary tests for exact multiples and just-above-multiple delays to validate rounding-up.
+The VUnit testbench validates:
 
-Large-delay test to exercise counter width and integer limits.
+- reset behavior
+- start-pulse detection
+- busy/done transitions
+- correct cycle count
+- async-reset recovery
 
-Start-pulse stress test repeated and overlapping starts while busy.
+### Lab Tests (lab_test/)
 
-Async reset stress assert reset at many different times relative to clock and start.
+- tb_compare_div.sh: compare cycle-calculation methods (natural integer, floating point, time, unsigned 64).
+- tb_test_width.sh: sweep frequency/delay combinations to verify optimal counter width.
+- tb_time_to_calc.sh: verify rounding-up correctness of the natural integer implementation.
 
-Synthesis smoke test run Yosys to confirm synthesizability even for edge cases.
+These experiments confirm that the natural-integer method is the only fully synthesizable and bit-width-optimal approach.
 
+---
 
+## 5. Synthesis Flow (Yosys)
 
-Further commits will add:
-- Cycle calculation logic
-- Timer RTL implementation
-- Full VUnit test suite
-- Synthesis scripts
-- CI pipeline
-- Further Documentation and Design choices
+Yosys cannot reliably pass VHDL generics via the command line, so a wrapper fixes the parameters.It acts as a configuration layer here:
 
+- src/timer_wrapper.vhd
+
+The main synthesis script is:
+
+- scripts/synth_check.ys
+
+Run synthesis with:
+
+make synth
+
+This elaborates the wrapper, runs Yosys synthesis, performs structural checks, and generates a Verilog netlist in netlist/synth_output_timer.v.
+
+---
+
+## 6. Next Steps
+
+Planned improvements:
+
+- parameter-sweep synthesis (multiple freq/delay combinations)
+- boundary-case tests (rounding edges, exact multiples)
+- large-delay stress tests (counter width growth)
+- start-pulse and async-reset stress tests
+- CI integration (simulation + synthesis)
+
+---
+
+## 7. AI Assistance
+
+AI was used for documentation and edge-case exploration.
+RTL decisions were validated through simulation and synthesis; only synthesizable constructs were kept. AI often suggests non synthesizable code.
 
