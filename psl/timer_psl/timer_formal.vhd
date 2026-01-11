@@ -155,5 +155,9 @@ begin
   -- psl PROP_IDLE_PERSISTS : assert always
   --   ((busy_r = '0') and (start_rising = '0')) |=> (busy_r = '0')
   --   abort (arst_i = '1');
+  
+  -- psl COVER_START : cover { (busy_r = '0') and (start_rising = '1') }; 
+  -- psl COVER_MAX_COUNT : cover { (busy_r = '1') and (at_max_count = '1') };
+  -- psl COVER_COMPLETE : cover { busy_r = '1'; done_o = '1' };
 
 end architecture rtl;

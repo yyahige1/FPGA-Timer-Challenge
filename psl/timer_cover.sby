@@ -1,0 +1,21 @@
+# SymbiYosys Configuration - Cover Mode (Reachability Analysis)
+# File: timer_cover.sby
+#
+# Uses GHDL to synthesize VHDL with PSL properties
+# Mode: Check that cover properties are reachable
+
+[options]
+mode cover
+depth 100
+
+[engines]
+smtbmc z3
+
+[script]
+plugin -i ghdl
+ghdl --std=08 -fpsl timer_formal.vhd -e timer_formal
+prep -top timer_formal
+
+[files]
+timer_psl/timer_formal.vhd
+
