@@ -28,6 +28,10 @@ jobs:
       run: |
         pip install vunit_hdl
     
+    - name: Set GHDL backend for VUnit
+      run: |
+        echo "VUNIT_GHDL_BACKEND=mcode" >> $GITHUB_ENV
+    
     - name: Run basic tests
       run: |
         python run.py
