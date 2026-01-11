@@ -68,7 +68,22 @@ pass 15 of 15
 Total time was 4.4 seconds
 All passed!
 ```
+## Multi-Configuration Testing
 
+Test the timer across 9 frequency/delay combinations:
+
+```bash
+make sweep         # Run full sweep + report
+make sweep-report  # View results
+make clean-sweep   # Remove logs
+```
+
+**Configurations tested:**
+- 10 MHz → 1 GHz clock frequencies
+- 10 ns → 10 µs delay periods 
+
+
+Logs saved to `sweep_logs/
 ### Lab Tests (lab_test/)
 
 - tb_compare_div.sh: compare cycle-calculation methods (natural integer, floating point, time, unsigned 64).
@@ -102,11 +117,6 @@ This elaborates the wrapper, runs Yosys synthesis, performs structural checks, a
 ## Planned Improvements
 
 ### Multi-Configuration Validation
-- **Test Sweep**: Automated testing across multiple frequency/delay combinations
-  - Target configs: 10MHz-1GHz, delays from 10ns-10µs
-  - Validates timing accuracy 
-  - Detects potential issues at extreme configurations (very fast/slow clocks)
-  
 - **Synthesis Sweep**: Verify synthesizability across configurations
   - Confirms design works at different clock speeds
   - Validates resource usage scaling(Correct number of bits for counter)
