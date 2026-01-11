@@ -1,0 +1,49 @@
+name: Timer Verification
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install GHDL
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ghdl
+    
+    - name: Install VUnit
+      run: |
+        pip install vunit_hdl
+    
+    - name: Run basic tests
+      run: |
+        python run.py
+    
+    - name: Run test sweep
+      run: |
+        python generate_sweep.py
+        ./run_sweep_all.sh
+    
+    - name: Generate sweep report
+      run: |
+        python report_sweep.py
+    
+    - name: Upload sweep logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: sweep-logs
+        path: sweep_logs/
