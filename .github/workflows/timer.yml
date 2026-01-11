@@ -73,10 +73,8 @@ jobs:
       with:
         name: netlists
         path: netlist/synth_*.v
-   - name: Run formal BMC
-  	run: |
-    	   source oss-cad-suite/environment
-    	   cd psl
-           make all
-
-
+    - name: Run formal BMC
+  	    run: |
+            source oss-cad-suite/environment
+            cd psl
+            make all
