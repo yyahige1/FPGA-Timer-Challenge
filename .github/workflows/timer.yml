@@ -30,6 +30,10 @@ jobs:
         tar -xzf oss-cad-suite-linux-x64-20260107.tgz
         rm oss-cad-suite-linux-x64-20260107.tgz
     
+    - name: Install VUnit
+      run: |
+        pip install vunit_hdl
+    
     - name: Run basic tests
       run: |
         source oss-cad-suite/environment
