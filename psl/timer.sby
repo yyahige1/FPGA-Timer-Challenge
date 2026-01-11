@@ -1,0 +1,22 @@
+# SymbiYosys Configuration for Timer Formal Verification
+# File: timer.sby
+#
+# Uses GHDL to synthesize VHDL with PSL properties
+# Mode: Bounded Model Checking (BMC)
+
+[options]
+mode bmc
+depth 50
+
+[engines]
+smtbmc z3
+
+[script]
+# Use GHDL plugin to read VHDL with PSL
+plugin -i ghdl
+ghdl --std=08 -fpsl timer_formal.vhd -e timer_formal
+prep -top timer_formal
+
+[files]
+timer_psl/timer_formal.vhd
+

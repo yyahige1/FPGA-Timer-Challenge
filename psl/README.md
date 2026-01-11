@@ -1,53 +1,52 @@
 # Formal Verification – Initial Commit
 
-  
- This commit introduces the initial structure for formal verification using PSL.
+This commit introduces the foundation for formal verification of the timer module using **PSL** and **SymbiYosys** (OSS CAD Suite). The goal is to begin with a minimal, focused proof that validates the core functional requirement before expanding to full protocol verification in later commits.
 
-  
-## What was added
+---
 
-  
+## What Was Added
 
-- A dedicated directory for **PSL-based formal verification**
+- A dedicated directory for **PSL‑based formal verification**
+- A formalized version of the timer (`timer_formal.vhd`)
+- A first **SymbiYosys configuration file** (`timer.sby`)
+- A `make bmc` target to run bounded model checking
+- A **single PSL assertion** capturing the key timing requirement
 
-- A formal version of the timer (`timer_formal.vhd`)
+> **Property proven:**  
+> When the timer reaches its internally computed maximum count, `done_o` must be asserted on the next clock cycle.
 
-- A **single PSL property** proving the key functional requirement:
+---
 
-  
+## Scope of This Commit
 
-> The timer always asserts `done_o` after the correct number of cycles.
+This initial step focuses on one essential correctness property:
 
-  
+- The timer computes the number of cycles based on `CLK_FREQ_HZ` and `DELAY_NS`
+- When `cnt_r = CYCLES_C - 1` and the timer is busy,  
+  the next cycle must assert `done_o`
+- Reset behavior is intentionally excluded from the proof using an explicit `abort (arst_i = '1')`
 
-## Scope of this commit
+This keeps the first proof small, deterministic, and easy to review.
 
-  
+---
 
-- When the timer reaches its maximum count, `done_o` must be asserted on the next clock cycle.
+## Why Start This Way
 
-- Reset behavior is excluded from the proof using an explicit abort condition.
+The intent of this commit is to:
 
-   
+- Introduce formal verification **incrementally**
+- Validate the most critical behavior first
+- Keep the PSL block intentionally minimal
+- Provide a clean baseline for future proofs
+- Ensure the CI pipeline can run formal checks early
 
-## Motivation
 
-  
+---
 
-The goal is to:
+## How to Run the Check
 
-- Introduce formal verification incrementally
+From the `psl/` directory:
 
-- Keep the initial proof easy to review and reason about
+```sh
+make bmc
 
-- Establish a solid base for adding further properties in later commits
-
-  
-
-Future commits will extend this with:
-
-- Input assumptions
-
-- Cover properties for reachability
-
-- Full protocol verification
