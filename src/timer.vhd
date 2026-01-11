@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- File: timer.vhd
 -- Parametric Timer - Synthesizable Version
--- Uses femtosecond integer arithmetic (no overflow for typical frequencies)
+-- Uses Nanosecond integer arithmetic (no overflow for typical frequencies but clamps higher frequencies >GHz)
 --------------------------------------------------------------------------------
 
 library ieee;
@@ -34,10 +34,10 @@ function time_to_cycles(freq : natural; delay : time) return natural is
   begin
 
     delay_ns := delay / 1 ns; --I have done other tests with higher precision (ps or fs) but
-    --it always caused bound check failures. A good limit I found was ns precision.
+    --it always caused bound check failures. A good realistic limit I found was ns precision.
     period_ns := 1000000000 / freq;
     
-    -- Safety check for very high frequencies. For now clamping Fhz>1GHz. Might change it for an assert or other solution if synthesizable
+    -- Safety check for very high frequencies. But these high frequencies should be cut off at elaboration time
     if period_ns < 1 then
       period_ns := 1;  -- Minimum 1 ns period
     end if;
@@ -72,13 +72,28 @@ function time_to_cycles(freq : natural; delay : time) return natural is
   -- Constants computed at elaboration time (compile-time)
   constant CYCLES_C    : natural := time_to_cycles(clk_freq_hz_g, delay_g);
   constant CNT_WIDTH_C : natural := ceil_log2(CYCLES_C);
+  -- Maximum cycles to prevent huge counters(24 bits counter is reasonable to synthesize) - THis is around 17ms of max delay at limit 1GHz frequency
+  constant MAX_CYCLES : natural := 16_777_216;  -- 2^24
   
+  -- Maximum frequency (1 GHz is the limit), 
+  constant MAX_FREQ : natural := 1_000_000_000;  
   -- Signals
   signal cnt_r      : unsigned(CNT_WIDTH_C - 1 downto 0) := (others => '0');
   signal busy_r     : std_ulogic := '0';
   signal start_d_r  : std_ulogic := '0';
+
   
 begin
+	-- Check limits at elaboration time
+  assert clk_freq_hz_g <= MAX_FREQ
+    report "Clock frequency too high: " & integer'image(clk_freq_hz_g) & " Hz"
+    severity failure;
+  
+  assert CYCLES_C <= MAX_CYCLES
+    report "Delay requires " & integer'image(CYCLES_C) & 
+           " cycles (max: " & integer'image(MAX_CYCLES) & ")"
+    severity failure;
+
    -- Design validation (checked at elaboration time)
   assert clk_freq_hz_g > 0
     report "clk_freq_hz_g must be > 0"

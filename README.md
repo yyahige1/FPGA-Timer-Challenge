@@ -84,6 +84,19 @@ make clean-sweep   # Remove logs
 
 
 Logs saved to `sweep_logs/
+
+## Long Delay Testing
+
+Test the timer with extended delays (1 second at 10 MHz):
+
+```bash
+make test-long    # Takes ~ 50 econds
+```
+
+Tests validate:
+- Basic 1-second countdown accuracy
+- Reset during long countdown
+- Multiple consecutive long delays
 ### Lab Tests (lab_test/)
 
 - tb_compare_div.sh: compare cycle-calculation methods (natural integer, floating point, time, unsigned 64).
@@ -163,6 +176,31 @@ ghdl -gdelay_g=1us timer.vhd  -- GHDL ignores time generics
 - Trade-off: Less elegant than pure VUnit, but necessary with `time` generics
 
 ---
+## Design Limits
+
+The timer enforces the following limits to prevent misuse:
+
+**Frequency Limits:**
+- Maximum: 1 GHz (protects against unrealistic configurations)
+- Minimum: > 0 Hz (must be positive)
+
+**Delay Limits:**
+- Maximum cycles: 16,777,216 (2²⁴) - prevents huge counters
+- Minimum: > 0 fs (must be positive)
+
+**Practical Impact:**
+
+| Clock Frequency | Max Delay  |
+|-----------------|------------|
+| 1 GHz           | 16.7 ms    |
+| 500 MHz         | 33.5 ms    |
+| 100 MHz         | 167 ms     |
+| 10 MHz          | 1.67 s     |
+| 1 MHz           | 16.7 s     |
+
+Violations trigger assertion failures at elaboration/simulation time.
+
+See [Design_limits.md.md](Design_limits.md.md) for detailed rationale.
 
 ## 7. AI Assistance
 

@@ -8,6 +8,9 @@ VHDL_SRC=src/timer.vhd
 run:
 	python run.py
 
+# Run long delay test (takes ~50 seconds)
+test-long:
+	python run_long_delay.py
 clean:
 	rm -rf $(SYNTH_OUTPUT) vunit_out/
 	cd lab_test ; rm -rf build/
