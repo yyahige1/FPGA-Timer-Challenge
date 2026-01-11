@@ -110,16 +110,27 @@ make synth
 
 This elaborates the wrapper, runs Yosys synthesis, performs structural checks, and generates a Verilog netlist in netlist/synth_output_timer.v.
 
+## Synthesis Sweep
+
+Verify the design synthesizes across all configurations:
+
+```bash
+make synth-sweep    # Synthesize all 9 configs
+make clean-synth    # Remove synthesis outputs
+```
+
+**Output:**
+- Logs: `synth_logs/<config>.log`
+- Netlists: `netlist/synth_<config>.v`
+
+All configurations use a wrapper with fixed generics (workaround for GHDL's inability to pass `time` generics).
 ---
 
 ## 6. Next Steps
 
 ## Planned Improvements
 
-### Multi-Configuration Validation
-- **Synthesis Sweep**: Verify synthesizability across configurations
-  - Confirms design works at different clock speeds
-  - Validates resource usage scaling(Correct number of bits for counter)
+### 
 ### CI/CD Integrationn
 ### Documentation
 

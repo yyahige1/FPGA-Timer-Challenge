@@ -32,3 +32,14 @@ sweep-report:
 clean-sweep:
 	rm -rf sweep_logs/
 
+# Synthesis sweep: run synthesis for all configs
+synth-sweep:
+	./make_sweep_synth.sh
+
+# Clean synthesis outputs
+clean-synth:
+	rm -rf synth_logs/
+	rm -f netlist/synth_*.v
+	rm -f $(SYNTH_OUTPUT)
+# Clean everything
+clean-all: clean clean-sweep clean-synth
