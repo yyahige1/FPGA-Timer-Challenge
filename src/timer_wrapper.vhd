@@ -2,7 +2,6 @@
 -- File: timer_wrapper.vhd
 -- Description: Wrapper for timer with fixed generics for synthesis
 --------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -18,11 +17,10 @@ end entity timer_wrapper;
 architecture rtl of timer_wrapper is
   
   -- Fixed parameters for synthesis
-  constant CLK_FREQ_HZ_C : natural := 100_000_000;  -- 100 MHz
-  constant DELAY_C       : time    := 1 us;          -- 1 microsecond
+  constant CLK_FREQ_HZ_C : natural := 1000000000;
+  constant DELAY_C       : time    := 10 ns;
   
 begin
-
   -- Instantiate timer with fixed generics
   u_timer : entity work.timer
     generic map (
@@ -35,5 +33,4 @@ begin
       start_i => start_i,
       done_o  => done_o
     );
-
 end architecture rtl;

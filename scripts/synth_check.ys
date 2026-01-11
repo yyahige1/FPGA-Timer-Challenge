@@ -1,25 +1,7 @@
 # synth_check.ys
 # Synthesis using wrapper with fixed generics
-
-# Read both files and elaborate the wrapper
-
-# old command not working: ghdl --std=08 -gclk_freq_hz_g=100000000 -gdelay_g=1us src/timer.vhd #-e timer
-#synth -top timer
-
-#The ghdl plugin in yosys did not support passing the generics in the command line and ignored them
-#As a result the elaboration failed and the synthesis check was not possible
-#A workaround was to use a wrapper which initialized those generics making the synthesis possible
-
-
-
 ghdl src/timer.vhd src/timer_wrapper.vhd -e timer_wrapper
-
-# Synthesize
 synth -top timer_wrapper
-
 check -assert
-# Write output
 write_verilog netlist/synth_output_timer.v
-
-# Statistics
 stat

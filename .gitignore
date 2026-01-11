@@ -1,0 +1,30 @@
+# VUnit outputs
+vunit_out/
+*.vhd.bak
+
+# Sweep results  
+sweep_logs/
+synth_logs/
+
+# Synthesis outputs
+netlist/synth_*.v
+netlist/*.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+vunit_env/
+
+# Build artifacts
+*.o
+*.cf
+work-obj*.cf
+
+# OS files
+.DS_Store
+Thumbs.db
+tb/backup_tb_timer.vhd
+tb/tb_timer.vhd.original
+lab_test/build/
+
