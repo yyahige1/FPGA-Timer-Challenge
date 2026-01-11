@@ -38,11 +38,20 @@ jobs:
       run: |
         source oss-cad-suite/environment
         make run
+    - name: Run Long test (Long delay)
+      run: |
+        source oss-cad-suite/environment
+        make test-long
     
     - name: Run test sweep
       run: |
         source oss-cad-suite/environment
         make sweep
+    
+    - name: Run synthesis sweep
+      run: |
+        source oss-cad-suite/environment
+        make synth-sweep
     
     - name: Upload sweep logs
       if: always()
@@ -50,3 +59,17 @@ jobs:
       with:
         name: sweep-logs
         path: sweep_logs/
+    
+    - name: Upload synthesis logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: synthesis-logs
+        path: synth_logs/
+    
+    - name: Upload netlists
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: netlists
+        path: netlist/synth_*.v

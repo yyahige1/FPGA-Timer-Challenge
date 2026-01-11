@@ -1,184 +1,150 @@
-# FPGA Timer Challenge
+# FPGA Timer - Parametric Timer Design
 
-A parametric, synthesizable VHDL timer designed and verified as part of the FPGA Engineering Challenge.
-The project includes RTL, testbenches, precision-analysis scripts, and a Yosys synthesis flow.
+![Tests](https://github.com/YOUR_USERNAME/FPGA-Timer-Challenge/workflows/Timer%20Verification/badge.svg)
 
----
+A synthesizable, parameterized hardware timer with comprehensive verification and CI/CD automation.
 
-## 1. Overview
+## Overview
 
-This project implements a configurable timer with:
+This project implements a configurable timer module for FPGA applications with:
+- Generic clock frequency and delay parameters
+- Comprehensive VUnit test suite (15 tests)
+- Multi-configuration validation (9 configs)
+- Automated synthesis verification
+- Full CI/CD pipeline
 
-- integer-based cycle computation
-- minimal counter width
-- synchronous logic with asynchronous reset
-- rising-edge start detection
-- full simulation and synthesis validation
+## Quick Start
 
-Technologies used: VHDL-2008, VUnit, Yosys + GHDL, and custom analysis scripts.
+### Prerequisites
 
----
+- **OSS CAD Suite** (includes GHDL, Yosys, VUnit)
+- **Python 3.10+**
+- **Make**
 
-## 2. Repository Structure
+### Local Setup
 
-src/          → RTL (timer + synthesis wrapper) 
-tb/           → VUnit testbench 
-lab_test/     → precision & bit-width experiments 
-scripts/      → Yosys synthesis scripts 
-netlist/      → synthesized output 
-run.py        → VUnit runner 
-Makefile      → run, clean, synth targets 
+```bash
+# 1. Download OSS CAD Suite
+wget https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2026-01-07/oss-cad-suite-linux-x64-20260107.tgz
+tar -xzf oss-cad-suite-linux-x64-20260107.tgz
 
----
+# 2. Install VUnit
+pip install vunit_hdl
 
-## 3. RTL Summary
+# 3. Source the environment
+source oss-cad-suite/environment
 
-- Cycle computation uses natural integer arithmetic:
-  - synthesizable
-  - predictable
-  - minimal counter width
+# 4. Run tests
+make run
+```
 
-- start_i is treated as a pulse input using an internal rising-edge detector.
-- The design is synchronous with an asynchronous reset.
-- done_o is asserted when idle or when the programmed delay expires.
+## Project Structure
 
----
-
-## 4. Verification
-
-### VUnit Testbench
-
+```
+.
+├── src/                    # VHDL source files
+│   └── timer.vhd          # Parametric timer implementation
+├── tb/                     # Testbenches
+│   ├── tb_timer.vhd       # Main test suite (15 tests)
+│   └── tb_timer_long.vhd  # Long delay tests
+├── scripts/                # Build scripts
+│   └── synth_check.ys     # Yosys synthesis script
+├── .github/workflows/      # CI/CD configuration
+│   └── timer.yml          # GitHub Actions workflow
+├── run.py                  # VUnit test runner
+├── run_long_delay.py       # Long delay test runner
+├── generate_sweep.py       # Test sweep generator
+├── report_sweep.py         # Sweep results analyzer
+├── run_sweep_all.sh        # Test sweep automation
+├── make_sweep_synth.sh     # Synthesis sweep automation
+├── makefile                # Build automation
+├── README.md               # This file
+├── Design_limits.md        # Design rationale and limits
+└── AI_Usage.md             # AI assistance disclosure
+```
 
 ## Testing
 
-The testbench contains **15 comprehensive tests** covering:
-- Basic functionality and timing
+### Basic Tests
+
+Run all 15 tests with current configuration:
+
+```bash
+source oss-cad-suite/environment
+make run
+```
+
+**Test Suite Coverage:**
+- Basic functionality and timing accuracy
 - Reset behavior (async reset, edge cases)
 - Start pulse handling and rejection
 - Stress testing and continuous operation
 - Edge cases and signal conflicts
 
-**See [tb/guide.md](tb/guide.md) for detailed test documentation.**
+See [tb/TB_TESTS.md](tb/TB_TESTS.md) for detailed test documentation.
 
-## Test Results
+### Multi-Configuration Testing
 
-All tests should pass:
-```
-pass 15 of 15
-Total time was 4.4 seconds
-All passed!
-```
-## Multi-Configuration Testing
-
-Test the timer across 9 frequency/delay combinations:
+Test across 9 frequency/delay combinations:
 
 ```bash
+source oss-cad-suite/environment
 make sweep         # Run full sweep + report
-make sweep-report  # View results
-make clean-sweep   # Remove logs
+make sweep-report  # View results only
 ```
 
 **Configurations tested:**
 - 10 MHz → 1 GHz clock frequencies
-- 10 ns → 10 µs delay periods 
+- 10 ns → 10 µs delay periods  
+- Total: 9 configs × 15 tests = **135 test cases**
 
+Logs saved to `sweep_logs/`
 
-Logs saved to `sweep_logs/
+### Long Delay Testing
 
-## Long Delay Testing
-
-Test the timer with extended delays (1 second at 10 MHz):
+Test with extended delays (1 second at 10 MHz):
 
 ```bash
-make test-long    # Takes ~ 50 econds
+source oss-cad-suite/environment
+make test-long    # Takes ~25 seconds
 ```
 
 Tests validate:
 - Basic 1-second countdown accuracy
 - Reset during long countdown
 - Multiple consecutive long delays
-### Lab Tests (lab_test/)
 
-- tb_compare_div.sh: compare cycle-calculation methods (natural integer, floating point, time, unsigned 64).
-- tb_test_width.sh: sweep frequency/delay combinations to verify optimal counter width.
-- tb_time_to_calc.sh: verify rounding-up correctness of the natural integer implementation.
+## Synthesis
 
-These experiments confirm that the natural-integer method is the only fully synthesizable and bit-width-optimal approach.
+### Single Configuration
 
----
-
-## 5. Synthesis Flow (Yosys)
-
-Yosys cannot reliably pass VHDL generics via the command line, so a wrapper fixes the parameters.It acts as a configuration layer here:
-
-- src/timer_wrapper.vhd
-
-The main synthesis script is:
-
-- scripts/synth_check.ys
-
-Run synthesis with:
-
-make synth
-
-This elaborates the wrapper, runs Yosys synthesis, performs structural checks, and generates a Verilog netlist in netlist/synth_output_timer.v.
-
-## Synthesis Sweep
-
-Verify the design synthesizes across all configurations:
+Synthesize with current configuration:
 
 ```bash
-make synth-sweep    # Synthesize all 9 configs
-make clean-synth    # Remove synthesis outputs
+source oss-cad-suite/environment
+make synth
+```
+
+Output: `netlist/synth_output_timer.v`
+
+### Multi-Configuration Synthesis
+
+Synthesize all 9 configurations:
+
+```bash
+source oss-cad-suite/environment
+make synth-sweep
 ```
 
 **Output:**
 - Logs: `synth_logs/<config>.log`
 - Netlists: `netlist/synth_<config>.v`
 
-All configurations use a wrapper with fixed generics (workaround for GHDL's inability to pass `time` generics).
----
+All configurations synthesize successfully with Yosys.
 
-## 6. Next Steps
-
-## Planned Improvements
-
-### 
-### CI/CD Integrationn
-### Documentation
-
-## Current Limitations
-
-### VHDL `time` Generic Issue
-The timer uses a `time` type generic (`delay_g : time`) which cannot be passed via command line to GHDL:
-
-```vhdl
--- This doesn't work:
-ghdl -gdelay_g=1us timer.vhd  -- GHDL ignores time generics
-```
-
-**Current Workarounds:**
-
-1. **For Testing**: Constants in testbench that are modified via scripts
-   ```vhdl
-   constant TB_DELAY : time := 1 us;  -- Changed by sed/bash
-   ```
-
-2. **For Synthesis**: Wrapper module with hardcoded generics
-   ```vhdl
-   constant DELAY_C : time := 1 us;  -- Regenerated per config
-   ```
-
-**Sweep Strategy:**
-- Script-based approach (bash/Python) to modify source files
-- Run simulation/synthesis for each configuration
-- Aggregate and analyze results
-- Trade-off: Less elegant than pure VUnit, but necessary with `time` generics
-
----
 ## Design Limits
 
-The timer enforces the following limits to prevent misuse:
+The timer enforces limits to prevent misuse:
 
 **Frequency Limits:**
 - Maximum: 1 GHz (protects against unrealistic configurations)
@@ -200,10 +166,87 @@ The timer enforces the following limits to prevent misuse:
 
 Violations trigger assertion failures at elaboration/simulation time.
 
-See [Design_limits.md.md](Design_limits.md.md) for detailed rationale.
+See [Design_limits.md](Design_limits.md) for detailed rationale.
 
-## 7. AI Assistance
+## CI/CD Pipeline
 
-AI was used for documentation and edge-case exploration.
-RTL decisions were validated through simulation and synthesis; only synthesizable constructs were kept. AI often suggests non synthesizable code.
+### Automated Testing
+
+Every push triggers GitHub Actions workflow that:
+
+1. ✓ Installs dependencies (OSS CAD Suite, VUnit)
+2. ✓ Runs basic tests (15 tests)
+3. ✓ Runs test sweep (135 tests across 9 configs)
+4. ✓ Runs synthesis sweep (9 configs)
+5. ✓ Uploads artifacts (logs and netlists)
+
+View results: **Actions** tab on GitHub
+
+### Artifacts
+
+After each CI run, download:
+- `sweep-logs` - Test results for all configurations
+- `synthesis-logs` - Synthesis reports
+- `netlists` - Generated Verilog for all configs
+
+## Makefile Commands
+
+| Command | Description |
+|---------|-------------|
+| `make run` | Run tests with current config |
+| `make sweep` | Run test sweep + report |
+| `make sweep-report` | View sweep results |
+| `make test-long` | Run long delay tests (~25s) |
+| `make synth` | Synthesize current config |
+| `make synth-sweep` | Synthesize all configs |
+| `make clean` | Remove build outputs |
+| `make clean-sweep` | Remove sweep logs |
+| `make clean-synth` | Remove synthesis outputs |
+| `make clean-all` | Remove everything |
+
+## Entity Interface
+
+```vhdl
+entity timer is
+  generic (
+    clk_freq_hz_g : natural;  -- Clock frequency in Hz
+    delay_g       : time      -- Delay duration (e.g., 1 us)
+  );
+  port (
+    clk_i   : in  std_ulogic;  -- Clock input
+    arst_i  : in  std_ulogic;  -- Async reset
+    start_i : in  std_ulogic;  -- Start pulse (ignored if busy)
+    done_o  : out std_ulogic   -- '1' when idle, '0' when counting
+  );
+end entity timer;
+```
+
+## Functional Behavior
+
+- Timer calculates required clock cycles from `clk_freq_hz_g` and `delay_g`
+- Rising edge on `start_i` begins countdown (if not already busy)
+- `done_o` is high when idle, low when counting
+- Asynchronous reset immediately returns timer to idle state
+- Start pulses ignored during countdown
+
+## Implementation Details
+
+- **Counter width:** Dynamically calculated based on required cycles
+- **Time precision:** Nanosecond resolution
+- **Rounding:** Always rounds UP to guarantee minimum delay
+- **Edge detection:** Detects rising edge on start_i for clean operation
+
+## Future Work
+
+### Formal Verification (Stretch Goal)
+
+Plan to add formal verification using SymbiYosys (sby):
+- Properties to verify: timer completion after exact cycle count
+- Coverage: all possible frequency/delay combinations within limits
+- Integration: Add formal checks to CI pipeline
+
+## Development Notes
+
+See [AI_Usage.md](AI_Usage.md) for AI assistance disclosure.
+
 

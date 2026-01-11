@@ -12,3 +12,5 @@ AI limitations encountered:
 - **Design verification**: Manual review and testing was essential to validate all AI-generated code. For example, debugging ANSI parsing issues was not possible with AI
 
 In practice, AI was primarily useful for documentation, aesthetic improvements to scripts, and automating repetitive tasks rather than core RTL development.
+
+I systematically checked with yosys for unsynthesizable code 
