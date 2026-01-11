@@ -1,6 +1,6 @@
 # FPGA Timer - Parametric Timer Design
 
-![Tests](https://github.com/YOUR_USERNAME/FPGA-Timer-Challenge/workflows/Timer%20Verification/badge.svg)
+![Tests](https://github.com/yyahige1/FPGA-Timer-Challenge/workflows/Timer%20Verification/badge.svg)
 
 A synthesizable, parameterized hardware timer with comprehensive verification and CI/CD automation.
 
@@ -11,6 +11,7 @@ This project implements a configurable timer module for FPGA applications with:
 - Comprehensive VUnit test suite (15 tests)
 - Multi-configuration validation (9 configs)
 - Automated synthesis verification
+- First stage of formal verification
 - Full CI/CD pipeline
 
 ## Quick Start
@@ -49,6 +50,8 @@ make run
 │   └── tb_timer_long.vhd  # Long delay tests
 ├── scripts/                # Build scripts
 │   └── synth_check.ys     # Yosys synthesis script
+├── psl/                   # PSL formal verification
+│   └── timer_psl          # Directory with formal Timer
 ├── .github/workflows/      # CI/CD configuration
 │   └── timer.yml          # GitHub Actions workflow
 ├── run.py                  # VUnit test runner
