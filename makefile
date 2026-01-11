@@ -10,7 +10,7 @@ run:
 
 # Run long delay test (takes ~50 seconds)
 test-long:
-	python run_long_delay.py
+	python run_long.py
 clean:
 	rm -rf $(SYNTH_OUTPUT) vunit_out/
 	cd lab_test ; rm -rf build/
