@@ -122,8 +122,38 @@ begin
 
   -- psl default clock is rising_edge(clk_i);
 
+  -- psl PROP_DONE_NOT_BUSY : assert always (done_o = not busy_r);
+
+  -- psl PROP_RESET_IDLE : assert always
+  --   (arst_i = '1') |=> (done_o = '1');
+
+  -- psl PROP_COUNTER_BOUNDED : assert always (cnt_r < CYCLES_C);
+
+  -- psl PROP_START_TRIGGERS_BUSY : assert always
+  --   ((busy_r = '0') and (start_rising = '1')) |=> (busy_r = '1')
+  --   abort (arst_i = '1');
+  
+  -- psl ASSUME_START_ONLY_AFTER_RESET : assume always 
+  -- (start_rising = '1') -> (arst_i = '0');
+  
   -- psl PROP_DONE_AT_MAX : assert always
   --   ((busy_r = '1') and (at_max_count = '1')) |=> (done_o = '1')
+  --   abort (arst_i = '1');
+
+  -- psl PROP_COUNTER_RESETS : assert always
+  --   ((busy_r = '1') and (at_max_count = '1')) |=> (cnt_r = 0)
+  --   abort (arst_i = '1');
+
+  -- psl PROP_BUSY_PERSISTS : assert always
+  --   ((busy_r = '1') and (at_max_count = '0')) |=> (busy_r = '1')
+  --   abort (arst_i = '1');
+
+  -- psl PROP_COUNTER_INCREMENTS : assert always
+  --   ((busy_r = '1') and (at_max_count = '0')) |=> (cnt_r = prev(cnt_r) + 1)
+  --   abort (arst_i = '1');
+
+  -- psl PROP_IDLE_PERSISTS : assert always
+  --   ((busy_r = '0') and (start_rising = '0')) |=> (busy_r = '0')
   --   abort (arst_i = '1');
 
 end architecture rtl;

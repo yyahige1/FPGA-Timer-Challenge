@@ -5,6 +5,7 @@ AI was used to assist with:
 - **Documentation**: Writing test descriptions, README sections, and code comments
 - **Scripting**: Generating sweep automation structure (bash/Python) and report formatting
 - **Analysis**: Identifying potential edge cases and test scenarios
+- **PSL Verification**: AI helped me learn the correct PSL syntax and guided me through the process. I can then translate myself with psl properties the functionnal requirements described in the document.
 
 AI limitations encountered:
 - **RTL Generation**: AI-proposed VHDL was often not synthesizable or used simulation-only constructs
