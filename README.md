@@ -48,13 +48,26 @@ Makefile      → run, clean, synth targets
 
 ### VUnit Testbench
 
-The VUnit testbench validates:
 
-- reset behavior
-- start-pulse detection
-- busy/done transitions
-- correct cycle count
-- async-reset recovery
+## Testing
+
+The testbench contains **15 comprehensive tests** covering:
+- Basic functionality and timing
+- Reset behavior (async reset, edge cases)
+- Start pulse handling and rejection
+- Stress testing and continuous operation
+- Edge cases and signal conflicts
+
+**See [tb/guide.md](tb/guide.md) for detailed test documentation.**
+
+## Test Results
+
+All tests should pass:
+```
+pass 15 of 15
+Total time was 4.4 seconds
+All passed!
+```
 
 ### Lab Tests (lab_test/)
 
@@ -86,13 +99,47 @@ This elaborates the wrapper, runs Yosys synthesis, performs structural checks, a
 
 ## 6. Next Steps
 
-Planned improvements:
+## Planned Improvements
 
-- parameter-sweep synthesis (multiple freq/delay combinations)
-- boundary-case tests (rounding edges, exact multiples)
-- large-delay stress tests (counter width growth)
-- start-pulse and async-reset stress tests
-- CI integration (simulation + synthesis)
+### Multi-Configuration Validation
+- **Test Sweep**: Automated testing across multiple frequency/delay combinations
+  - Target configs: 10MHz-1GHz, delays from 10ns-10µs
+  - Validates timing accuracy 
+  - Detects potential issues at extreme configurations (very fast/slow clocks)
+  
+- **Synthesis Sweep**: Verify synthesizability across configurations
+  - Confirms design works at different clock speeds
+  - Validates resource usage scaling(Correct number of bits for counter)
+### CI/CD Integrationn
+### Documentation
+
+## Current Limitations
+
+### VHDL `time` Generic Issue
+The timer uses a `time` type generic (`delay_g : time`) which cannot be passed via command line to GHDL:
+
+```vhdl
+-- This doesn't work:
+ghdl -gdelay_g=1us timer.vhd  -- GHDL ignores time generics
+```
+
+**Current Workarounds:**
+
+1. **For Testing**: Constants in testbench that are modified via scripts
+   ```vhdl
+   constant TB_DELAY : time := 1 us;  -- Changed by sed/bash
+   ```
+
+2. **For Synthesis**: Wrapper module with hardcoded generics
+   ```vhdl
+   constant DELAY_C : time := 1 us;  -- Regenerated per config
+   ```
+
+**Sweep Strategy:**
+- Script-based approach (bash/Python) to modify source files
+- Run simulation/synthesis for each configuration
+- Aggregate and analyze results
+- Trade-off: Less elegant than pure VUnit, but necessary with `time` generics
 
 ---
 
