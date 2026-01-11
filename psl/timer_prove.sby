@@ -1,0 +1,21 @@
+# SymbiYosys Configuration - Prove Mode (Unbounded Verification)
+# File: timer_prove.sby
+#
+# Uses GHDL to synthesize VHDL with PSL properties
+# Mode: Unbounded proving via k-induction or PDR
+
+[options]
+mode prove
+depth 30
+
+[engines]
+smtbmc z3
+
+[script]
+plugin -i ghdl
+ghdl --std=08 -fpsl timer_formal.vhd -e timer_formal
+prep -top timer_formal
+
+[files]
+timer_psl/timer_formal.vhd
+

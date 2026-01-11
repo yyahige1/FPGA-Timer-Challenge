@@ -1,7 +1,7 @@
 
 .PHONY: all bmc 
 
-all: bmc 
+all: bmc prove 
 	@echo "All formal verification passed!"
 
 # Bounded Model Checking
