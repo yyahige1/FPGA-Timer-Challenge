@@ -19,32 +19,26 @@ jobs:
       with:
         python-version: '3.10'
     
-    - name: Install GHDL
+    - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y ghdl
+        sudo apt-get install -y make
     
-    - name: Install VUnit
+    - name: Download and setup OSS CAD Suite
       run: |
-        pip install vunit_hdl
-    
-    - name: Set GHDL backend for VUnit
-      run: |
-        echo "VUNIT_GHDL_BACKEND=mcode" >> $GITHUB_ENV
+        wget https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2026-01-07/oss-cad-suite-linux-x64-20260107.tgz
+        tar -xzf oss-cad-suite-linux-x64-20260107.tgz
+        rm oss-cad-suite-linux-x64-20260107.tgz
     
     - name: Run basic tests
       run: |
-        python run.py
+        source oss-cad-suite/environment
+        make run
     
     - name: Run test sweep
       run: |
-        python generate_sweep.py
-        chmod +x run_sweep_all.sh
-        ./run_sweep_all.sh
-    
-    - name: Generate sweep report
-      run: |
-        python report_sweep.py
+        source oss-cad-suite/environment
+        make sweep
     
     - name: Upload sweep logs
       if: always()
