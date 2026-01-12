@@ -74,7 +74,7 @@ jobs:
         name: netlists
         path: netlist/synth_*.v
         
-    - name: Run synthesis sweep
+    - name: Run formal verification
       run: |
             source oss-cad-suite/environment
             cd psl
