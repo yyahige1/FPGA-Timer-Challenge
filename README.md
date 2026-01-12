@@ -11,14 +11,14 @@ This project implements a configurable timer module for FPGA applications with:
 - Comprehensive VUnit test suite (15 tests)
 - Multi-configuration validation (9 configs)
 - Automated synthesis verification
-- First stage of formal verification
+- **PSL formal verification with SymbiYosys**
 - Full CI/CD pipeline
 
 ## Quick Start
 
 ### Prerequisites
 
-- **OSS CAD Suite** (includes GHDL, Yosys, VUnit)
+- **OSS CAD Suite** (includes GHDL, Yosys, SymbiYosys, Z3)
 - **Python 3.10+**
 - **Make**
 
@@ -48,10 +48,15 @@ make run
 ├── tb/                     # Testbenches
 │   ├── tb_timer.vhd       # Main test suite (15 tests)
 │   └── tb_timer_long.vhd  # Long delay tests
+├── psl/                    # PSL formal verification
+│   ├── timer_formal.vhd   # Timer with PSL assertions
+│   ├── timer.sby          # BMC configuration
+│   ├── timer_prove.sby    # Unbounded proving config
+│   ├── timer_cover.sby    # Coverage analysis config
+│   ├── Makefile           # Formal verification targets
+│   └── README.md          # Formal verification docs
 ├── scripts/                # Build scripts
 │   └── synth_check.ys     # Yosys synthesis script
-├── psl/                   # PSL formal verification
-│   └── timer_psl          # Directory with formal Timer
 ├── .github/workflows/      # CI/CD configuration
 │   └── timer.yml          # GitHub Actions workflow
 ├── run.py                  # VUnit test runner
@@ -60,7 +65,7 @@ make run
 ├── report_sweep.py         # Sweep results analyzer
 ├── run_sweep_all.sh        # Test sweep automation
 ├── make_sweep_synth.sh     # Synthesis sweep automation
-├── makefile                # Build automation
+├── Makefile                # Build automation
 ├── README.md               # This file
 ├── Design_limits.md        # Design rationale and limits
 └── AI_Usage.md             # AI assistance disclosure
@@ -116,6 +121,43 @@ Tests validate:
 - Basic 1-second countdown accuracy
 - Reset during long countdown
 - Multiple consecutive long delays
+
+## Formal Verification
+
+The timer includes formal verification using **PSL (Property Specification Language)** with **GHDL + SymbiYosys** from the OSS CAD Suite.
+
+### Quick Start
+
+```bash
+cd psl/
+source /path/to/oss-cad-suite/environment
+make bmc      # Bounded model checking
+make prove    # Unbounded proving
+make cover    # Reachability analysis
+make all      # Run all verification modes
+```
+
+### Properties Verified
+
+The formal verification proves the following key properties:
+
+| Property | Description |
+|----------|-------------|
+| `PROP_DONE_AT_MAX` | **Timer asserts `done_o` after exact cycle count** |
+| `PROP_DONE_NOT_BUSY` | `done_o` always equals `not busy_r` |
+| `PROP_RESET_IDLE` | After reset, timer is idle (`done_o = '1'`) |
+| `PROP_COUNTER_BOUNDED` | Counter never exceeds `CYCLES_C - 1` |
+| `PROP_START_TRIGGERS_BUSY` | Start edge triggers busy state |
+| `PROP_BUSY_PERSISTS` | Busy state persists until max count |
+| `PROP_COUNTER_INCREMENTS` | Counter increments correctly each cycle |
+
+### Verification Modes
+
+- **BMC (Bounded Model Checking)**: Checks no violations within N cycles
+- **Prove**: Unbounded induction proving properties hold forever
+- **Cover**: Verifies all states/scenarios are reachable
+
+See [psl/README.md](psl/README.md) for detailed formal verification documentation.
 
 ## Synthesis
 
@@ -181,7 +223,8 @@ Every push triggers GitHub Actions workflow that:
 2. ✓ Runs basic tests (15 tests)
 3. ✓ Runs test sweep (135 tests across 9 configs)
 4. ✓ Runs synthesis sweep (9 configs)
-5. ✓ Uploads artifacts (logs and netlists)
+5. ✓ Runs formal verification (BMC, prove, cover)
+6. ✓ Uploads artifacts (logs and netlists)
 
 View results: **Actions** tab on GitHub
 
@@ -191,6 +234,7 @@ After each CI run, download:
 - `sweep-logs` - Test results for all configurations
 - `synthesis-logs` - Synthesis reports
 - `netlists` - Generated Verilog for all configs
+- `formal-results` - Formal verification logs
 
 ## Makefile Commands
 
@@ -206,6 +250,8 @@ After each CI run, download:
 | `make clean-sweep` | Remove sweep logs |
 | `make clean-synth` | Remove synthesis outputs |
 | `make clean-all` | Remove everything |
+
+For formal verification commands, see [psl/README.md](psl/README.md).
 
 ## Entity Interface
 
@@ -239,17 +285,6 @@ end entity timer;
 - **Rounding:** Always rounds UP to guarantee minimum delay
 - **Edge detection:** Detects rising edge on start_i for clean operation
 
-## Future Work
-
-### Formal Verification (Stretch Goal)
-
-Plan to add formal verification using SymbiYosys (sby):
-- Properties to verify: timer completion after exact cycle count
-- Coverage: all possible frequency/delay combinations within limits
-- Integration: Add formal checks to CI pipeline
-
 ## Development Notes
 
 See [AI_Usage.md](AI_Usage.md) for AI assistance disclosure.
-
-

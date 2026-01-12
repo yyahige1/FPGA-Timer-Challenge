@@ -11,8 +11,8 @@ use ieee.math_real.all;
 
 entity timer_formal is
   generic (
-    CLK_FREQ_HZ : natural := 100000000;  -- 100 MHz default
-    DELAY_NS    : natural := 100         -- 100 ns default
+    clk_freq_hz_g : natural := 100000000;  -- 100 MHz default
+    delay_g       : time    := 100 ns      -- I changed to natural temporaily because I kept running into issues but it turned out it was because i didnt add the ghdl plugin in the sby scripts 
   );
   port (
     clk_i   : in  std_ulogic;
@@ -25,21 +25,24 @@ end entity timer_formal;
 architecture rtl of timer_formal is
 
   ------------------------------------------------------------------------------
-  -- Functions (same as original timer)
+  -- Functions (identical to original timer.vhd)
   ------------------------------------------------------------------------------
   
-  function calc_cycles(freq : natural; delay_ns : natural) return natural is
-    variable period_ns  : natural;
+  function time_to_cycles(freq : natural; delay : time) return natural is
+    variable delay_ns   : integer;
+    variable period_ns  : integer;
     variable num_cycles : natural;
-    variable remainder  : natural;
+    variable remainder  : integer;
   begin
+    delay_ns := delay / 1 ns;
     period_ns := 1000000000 / freq;
+    
     if period_ns < 1 then
       period_ns := 1;
     end if;
     
     num_cycles := delay_ns / period_ns;
-    remainder  := delay_ns rem period_ns;
+    remainder := delay_ns rem period_ns;
     
     if remainder > 0 then
       num_cycles := num_cycles + 1;
@@ -62,9 +65,9 @@ architecture rtl of timer_formal is
   end function;
   
   ------------------------------------------------------------------------------
-  -- Constants
+  -- Constants (identical to original timer.vhd)
   ------------------------------------------------------------------------------
-  constant CYCLES_C    : natural := calc_cycles(CLK_FREQ_HZ, DELAY_NS);
+  constant CYCLES_C    : natural := time_to_cycles(clk_freq_hz_g, delay_g);
   constant CNT_WIDTH_C : natural := ceil_log2(CYCLES_C);
   
   ------------------------------------------------------------------------------
@@ -81,13 +84,13 @@ architecture rtl of timer_formal is
 begin
 
   ------------------------------------------------------------------------------
-  -- Signal assignments (makes PSL cleaner)
+  -- Helper signal assignments
   ------------------------------------------------------------------------------
   start_rising <= '1' when (start_i = '1' and start_d_r = '0') else '0';
   at_max_count <= '1' when (cnt_r = to_unsigned(CYCLES_C - 1, CNT_WIDTH_C)) else '0';
 
   ------------------------------------------------------------------------------
-  -- Main sequential process (identical to original timer)
+  -- Main sequential process (identical to original timer.vhd)
   ------------------------------------------------------------------------------
   process(clk_i, arst_i)
   begin
@@ -134,7 +137,7 @@ begin
   --   abort (arst_i = '1');
   
   -- psl ASSUME_START_ONLY_AFTER_RESET : assume always 
-  -- (start_rising = '1') -> (arst_i = '0');
+  --   (start_rising = '1') -> (arst_i = '0');
   
   -- psl PROP_DONE_AT_MAX : assert always
   --   ((busy_r = '1') and (at_max_count = '1')) |=> (done_o = '1')
